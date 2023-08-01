@@ -1,0 +1,37 @@
+node('built-in') {
+    
+    stage('Continuous Download') 
+    
+    {
+        
+        git 'https://github.com/intelliqittrainings/maven.git'
+    }
+    
+    stage('Continuous Build') 
+    
+    {
+        
+       sh 'mvn package'
+    }
+    
+    stage('Continuous Deployment') 
+    
+    {
+      deploy adapters: [tomcat9(credentialsId: '24c0599a-4082-4ab3-9e09-4bcad0b95b96', path: '', url: 'http://172.31.85.240:8080')], contextPath: 'testapp', war: '**/*.war'  
+       
+    }
+   
+    stage('testing')
+    {
+        git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+        sh 'java  -jar /var/lib/jenkins/workspace/Scriptedpipeline1/testing.jar'
+    }
+   stage('continous delivery')
+   {
+       input message: 'need approvel from delivery manager', submitter: 'Arjun'
+       
+       deploy adapters: [tomcat9(credentialsId: '24c0599a-4082-4ab3-9e09-4bcad0b95b96', path: '', url: 'http://172.31.89.90:8080')], contextPath: 'prodapp', war: '**/*.war'
+   }
+    
+    
+}
